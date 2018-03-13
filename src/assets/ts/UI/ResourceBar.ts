@@ -1,13 +1,12 @@
-import PlayerUnit from '../PlayerUnit';
+import Unit from '../Unit';
 export default class ResourceBar extends PIXI.Container {
   public opt: any = {w: 150, h: 20, radius: 5, offsetV: 75, offsetH: 15};
-  public player: PlayerUnit;
+  public player: Unit;
   public hpBar: PIXI.Graphics = new PIXI.Graphics();
   public hpText: PIXI.Text = this.textInfo();
-  constructor(player: PlayerUnit) {
+  constructor(player: Unit) {
     super();
     this.player = player;
-    // this.zIndex = 2;
     this.position.set(this.opt.offsetH, window.app.screen.height - (this.opt.offsetV + this.opt.h));
     this.drawBar();
     this.hpText.text = this.player.stats.HP + ' / ' + this.player.stats.maxHP;

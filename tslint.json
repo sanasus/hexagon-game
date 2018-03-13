@@ -49,6 +49,7 @@
             "timeEnd",
             "trace"
         ],
+        "trailing-comma": false,
         "no-construct": true,
         "no-debugger": true,
         "no-duplicate-super": true,

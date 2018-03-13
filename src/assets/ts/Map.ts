@@ -1,14 +1,17 @@
 import Hexagon from './Hexagon';
+import Biom from './Biom';
 
 export default class Map {
   public static width: number = 0;
   public static height: number = 0;
+  public static dataMatrix: number[][] = [[]];
   public static matrix: Hexagon[][] = [[]];
 
   public static setMatrix(matrix: number[][]): void {
     this.width = matrix[0].length;
     this.height = matrix.length;
-    this.createMap(matrix);
+    this.dataMatrix = matrix;
+    this.createMap(this.dataMatrix);
   }
 
   public static getPathHex(path: IHex[]): Hexagon[] {
@@ -25,7 +28,7 @@ export default class Map {
   }
 
   public static hexIsBlock(hex: IHex): boolean {
-    return Map.matrix[hex.row][hex.col].biom.isBlock;
+    return Biom.isBlock(Map.dataMatrix[hex.row][hex.col]);
   }
 
   public static hexIsUnit(hex: IHex): boolean {
@@ -36,22 +39,31 @@ export default class Map {
     return hex.row * this.width + hex.col;
   }
 
+  public static dataMatrixFor(cb: (row: number[], rowID: number, biom: number, colID: number) => void): void {
+    Map.dataMatrix.forEach((row: number[], rowID: number) => {
+      row.forEach((biom: number, colID: number) => {
+        cb(row, rowID, biom, colID);
+      });
+    });
+  }
+
+  public static matrixFor(cb: (hex: Hexagon) => void): void {
+    Map.matrix.forEach((row: Hexagon[]) => {
+      row.forEach((hex: Hexagon) => {
+        cb(hex);
+      });
+    });
+  }
+
   public static createMap(oldmatrix: number[][]): void {
     let matrix: Hexagon[][] = [];
     oldmatrix.forEach((row: number[], rowID: number) => {
       matrix.push([]);
       row.forEach((col: number, colID: number) => {
-        let hex: Hexagon = new Hexagon(colID, rowID, col);
+        let hex: Hexagon = new Hexagon(colID, rowID);
         matrix[rowID].push(hex);
       });
     });
-    // for (let row: number = 0; row < this.height; row++) {
-    //   matrix.push([]);
-    //   for (let col: number = 0; col < this.width; col++) {
-    //     let hex: Hexagon = new Hexagon(col, row);
-    //     matrix[row].push(hex);
-    //   }
-    // }
     this.matrix = matrix;
   }
 }

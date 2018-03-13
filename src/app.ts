@@ -1,12 +1,14 @@
 import 'normalize.css';
 import './assets/scss/app.scss';
 import * as PIXI from 'pixi.js';
-import "./assets/ts/keyboard";
+import "./assets/ts/keyboard"; 
+import "pixi-layers";
+import "pixi-projection";
 import Boot from "./assets/ts/state/Boot";
 import Battle from "./assets/ts/state/Battle";
 import {Game} from "./assets/ts/pixi-game";
 import datGui from "dat.gui";
-import "pixi-layers";
+import {addDisplayGroups} from './assets/ts/Display';
 
 class App extends Game {
   constructor() {
@@ -15,6 +17,7 @@ class App extends Game {
       antialias: true,
     });
     PIXI.ticker.shared.speed = 1;
+    addDisplayGroups(this);
 
     this.state.add("Battle", Battle);
     this.state.add("Boot", Boot);
@@ -22,7 +25,7 @@ class App extends Game {
 
     window.onresize = (): void => {
       this.renderer.resize(window.innerWidth, window.innerHeight);
-      this.state.active.state.removeChildren();
+      // this.state.active.state.removeChildren();
       this.state.active.state.rerender();
     };
   }
@@ -34,11 +37,6 @@ document.body.appendChild(window.app.view);
 window.GUI = new datGui.GUI();
 window.GUI.fGame = window.GUI.addFolder('game');
 window.GUI.fGame.add(PIXI.ticker.shared, 'speed');
-// let type: string = "WebGL";
-// if (!PIXI.utils.isWebGLSupported()) {
-//   type = "canvas";
-// }
-// PIXI.utils.sayHello(type);
 //
 // let stage: any = new PIXI.display.Stage();
 // stage.group.enableSort = true;

@@ -16,8 +16,7 @@ const PATHS = {
     src: path.join(__dirname, 'src'),
     dist: path.join(__dirname, 'dist')
 };
-const common = merge([
-    {
+const common = merge([{
         entry: {
             app: './app.ts'
         },
@@ -49,7 +48,7 @@ const common = merge([
     file()
 ]);
 
-module.exports = function (env) {
+module.exports = function(env) {
     if (env === 'production') {
         return merge([
             common,

@@ -3,6 +3,7 @@ import Map from "./Map";
 import Hexagon from "./Hexagon";
 import Unit from "./Unit";
 import {OutlineFilter} from "pixi-filters";
+import Biom from "./Biom";
 
 interface ICameFrom {
   [propName: string]: IHex | null;
@@ -26,14 +27,15 @@ export default class PathFind {
   private static cameFrom: ICameFrom = {};
   private static costSoFar: ICostSoFar = {};
 
-  public static playerPath(start: Hexagon, finish: Hexagon): void {
+  public static playerPath(start: Hexagon | null, finish: Hexagon): void {
+    if (!start) return;
     let outlineFilterBlue: any = new OutlineFilter(2, 0x99ff99);
     PathFind.pathPoints.forEach((el: IHex) => {
-      Map.matrix[el.row][el.col].biom.filters = [];
+      Map.matrix[el.row][el.col].filters = [];
     });
     PathFind.getPath(start, finish);
     PathFind.pathPoints.forEach((el: IHex) => {
-      Map.matrix[el.row][el.col].biom.filters = [outlineFilterBlue];
+      Map.matrix[el.row][el.col].filters = [outlineFilterBlue];
     });
   }
 
@@ -62,7 +64,7 @@ export default class PathFind {
         let nextHex: IHex = Coordinate.axialHexToHex(next);
         if (!Map.hexInMap(nextHex) || PathFind.isBlock(nextHex)) return;
         let nextOffset: IPriorHex = {
-          prior: Map.matrix[nextHex.row][nextHex.col].biom.cost,
+          prior: Biom.getCost(Map.dataMatrix[nextHex.row][nextHex.col]),
           hex: next,
         };
         let newCost: number = PathFind.costSoFar[JSON.stringify(current.hex)] +  nextOffset.prior;

@@ -1,10 +1,18 @@
+import Hexagon from './Hexagon';
 export default class Coordinate {
   public static hex(q: number, r: number): IHex {
-    return {col: q, row: r};
+    return {
+      col: q,
+      row: r
+    };
   }
 
   public static cube(x: number, y: number, z: number): ICube {
-    return {x: x, y: y, z: z};
+    return {
+      x: x,
+      y: y,
+      z: z
+    };
   }
 
   public static cubeToAxial(cube: ICube): IHex {
@@ -71,6 +79,10 @@ export default class Coordinate {
     return this.cube(rx, ry, rz);
   }
 
+  public static hexRound(hex: IHex): IHex {
+    return Coordinate.cubeToAxial(Coordinate.cubeRound(Coordinate.axialToCube(hex)));
+  }
+
   public static cubeNeighbors(): ICube[] {
     return [
       this.cube(+2, -1, -1), this.cube(+1, +1, -2), this.cube(-1, +2, -1),
@@ -111,6 +123,11 @@ export default class Coordinate {
 
   public static hexIsEqual(hex1: IHex, hex2: IHex): boolean {
     return hex1.col === hex2.col && hex1.row === hex2.row;
+  }
+  public static pixelToHex({x, y}: any): IHex {
+    let q: number = (x * Math.sqrt(3) / 3 - y / 3) / Hexagon.size;
+    let r: number = y * 2 / 3 / Hexagon.size;
+    return Coordinate.hexRound(Coordinate.hex(q, r));
   }
 
 }

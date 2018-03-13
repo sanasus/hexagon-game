@@ -1,5 +1,6 @@
 import {State} from "../pixi-game";
 import * as dragonBones from "dragonbones-pixi";
+import Map from "../Map";
 export default class Boot extends State {
   public init(): void {
     const loading: PIXI.Text = new PIXI.Text('loading...', {
@@ -27,6 +28,7 @@ export default class Boot extends State {
     const factory: any = dragonBones.dragonBones.PixiFactory.factory;
     factory.parseDragonBonesData(this.loader.resources['mecha_1004d_ske.json'].data);
     factory.parseTextureAtlasData(this.loader.resources['mecha_1004d_tex.json'].data, this.loader.resources['mecha_1004d_tex.png'].texture);
+    Map.setMatrix(this.assets['map'].data.matrix);
     this.state.start('Battle');
   }
   public update(): void {
