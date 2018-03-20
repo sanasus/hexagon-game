@@ -1,4 +1,4 @@
-import { dragonBones} from "dragonbones-pixi";
+import { dragonBones } from "dragonbones-pixi";
 import Map from "./Map";
 import Hexagon from "./Hexagon";
 import MoveUnit from "./MoveUnit";
@@ -12,7 +12,7 @@ export default class Unit extends PIXI.utils.EventEmitter {
   private _armatureDisplay: dragonBones.PixiArmatureDisplay;
   public hex: Hexagon | null = null;
   public container: PIXI.projection.Sprite2d;
-  public stats: any = { HP: 500, maxHP: 500, atk: 250, initiative: 10, mobility: 3, energy: 1};
+  public stats: any = { HP: 500, maxHP: 500, atk: 250, initiative: 10, mobility: 3, energy: 1 };
   public move: MoveUnit;
   public attack: AttackUnit;
   public animation: AnimationUnit;
@@ -59,7 +59,7 @@ export default class Unit extends PIXI.utils.EventEmitter {
   }
 
   public flipToEnemy(enemy: IAxial): void {
-    if (this.container.x < enemy.x)  this.flip();
+    if (this.container.x < enemy.x) this.flip();
     else this.flip('left');
   }
 

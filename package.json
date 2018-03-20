@@ -19,6 +19,7 @@
     "pixi-keyboard": "^0.9.4",
     "pixi-layers": "^0.1.4",
     "pixi-projection": "^0.1.9",
+    "pixi-tween": "^0.2.0",
     "pixi.js": "^4.7.0"
   },
   "devDependencies": {

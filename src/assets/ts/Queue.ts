@@ -12,9 +12,13 @@ export default class Queue {
     }
 
     public next(): void {
+        this.queue = this.queue.filter((el: Unit) => {
+            return el.stats.HP > 0;
+        });
+        if (this.queue.length === 1) return;
         let first: Unit = this.queue[0];
         this.queue.splice(0, 1);
-        this.queue.push(first);
+        if (first.stats.HP > 0) this.queue.push(first);
     }
 
 }

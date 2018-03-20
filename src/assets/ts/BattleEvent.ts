@@ -12,23 +12,24 @@ export class BattleEvent extends PIXI.utils.EventEmitter {
         });
         PIXI.keyboardManager.on('pressed', (key: any) => {
             if (key === PIXI.keyboard.Key.ESCAPE) {
-                Battle.queue.next();
+                Battle.PathDraw.clear();
+                Battle.Queue.next();
             }
         });
     }
 
     public mapMousemove(hex: Hexagon): void {
-        if (Battle.queue.queue[0].hex !== null && Battle.queue.queue[0].animation.isComplete) {
-            PathFind.playerPath(Battle.queue.queue[0].hex, hex);
+        if (Battle.Queue.queue[0].hex !== null && Battle.Queue.queue[0].animation.isComplete) {
+            PathFind.playerPath(Battle.Queue.queue[0].hex, hex);
         }
     }
 
     public mapClick(hex: Hexagon): void {
-        if (Battle.queue.queue[0].hex === null) Battle.queue.queue[0].addToMap(Battle.mapContainer2d, hex);
-        if (Battle.queue.queue[0].animation.isComplete) {
-            if (hex.unit !== null) Battle.queue.queue[0].attack.attack(hex.unit);
+        if (Battle.Queue.queue[0].hex === null) Battle.Queue.queue[0].addToMap(Battle.BattleMap, hex);
+        if (Battle.Queue.queue[0].animation.isComplete) {
+            if (hex.unit !== null) Battle.Queue.queue[0].attack.attack(hex.unit);
             else {
-                Battle.queue.queue[0].move.setMovePath(Map.getPathHex(PathFind.pathPoints));
+                Battle.Queue.queue[0].move.setMovePath(Map.getPathHex(PathFind.pathPoints));
             }
         }
     }

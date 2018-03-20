@@ -2,7 +2,6 @@ import Coordinate from "./Coordinate";
 import Map from "./Map";
 import Hexagon from "./Hexagon";
 import Unit from "./Unit";
-import {OutlineFilter} from "pixi-filters";
 import Biom from "./Biom";
 
 interface ICameFrom {
@@ -19,7 +18,11 @@ interface IPriorHex {
 }
 
 export default class PathFind {
+  public static event: PIXI.utils.EventEmitter = new PIXI.utils.EventEmitter();
   public static pathPoints: IHex[] = [];
+  public static pathCost: number[] = [0];
+  public static readonly BEFORE_PATH_FIND: string = 'BEFORE_PATH_FIND';
+  public static readonly AFTER_PATH_FIND: string = 'AFTER_PATH_FIND';
 
   private static priorQueue: IPriorHex[] = [];
   private static start: IHex = {col: 0, row: 0};
@@ -29,83 +32,84 @@ export default class PathFind {
 
   public static playerPath(start: Hexagon | null, finish: Hexagon): void {
     if (!start) return;
-    let outlineFilterBlue: any = new OutlineFilter(2, 0x99ff99);
-    PathFind.pathPoints.forEach((el: IHex) => {
-      Map.matrix[el.row][el.col].filters = [];
-    });
-    PathFind.getPath(start, finish);
-    PathFind.pathPoints.forEach((el: IHex) => {
-      Map.matrix[el.row][el.col].filters = [outlineFilterBlue];
-    });
+    this.event.emit(this.BEFORE_PATH_FIND);
+    this.getPath(start, finish);
+    this.event.emit(this.AFTER_PATH_FIND, start);
+    // console.log(this.pathPoints);
+    // console.log(this.pathCost);
   }
 
-  public static getPath(start: Hexagon, finish: Hexagon): void {
-    PathFind.start = start.coordinateOffset;
-    PathFind.finish = finish.coordinateOffset;
-    if (Map.hexIsBlock(start.coordinate) || PathFind.isBlock(finish.coordinate)) return;
-    PathFind.getAllPath();
-    PathFind.getFindPath();
+  private static getPath(start: Hexagon, finish: Hexagon): void {
+    this.start = start.coordinateOffset;
+    this.finish = finish.coordinateOffset;
+    if (Map.hexIsBlock(start.coordinate) || this.isBlock(finish.coordinate)) return;
+    this.getAllPath();
+    this.getFindPath();
   }
 
   private static getAllPath(): void {
-    PathFind.priorQueue = [];
-    PathFind.addPriorFrontier(PathFind.start, 0);
-    PathFind.cameFrom = {};
-    PathFind.costSoFar = {};
-    PathFind.cameFrom[JSON.stringify(PathFind.start)] = null;
-    PathFind.costSoFar[JSON.stringify(PathFind.start)] = 0;
+    this.priorQueue = [];
+    this.addPriorFrontier(this.start, 0);
+    this.cameFrom = {};
+    this.costSoFar = {};
+    this.cameFrom[JSON.stringify(this.start)] = null;
+    this.costSoFar[JSON.stringify(this.start)] = 0;
     let current: IPriorHex;
     let date: any = new Date().getMilliseconds();
-    while (PathFind.priorQueue.length !== 0) {
-      current = PathFind.getPriorFrontier();
-      if (current.hex.col === PathFind.finish.col && current.hex.row === PathFind.finish.row) break;
+    while (this.priorQueue.length !== 0) {
+      current = this.getPriorFrontier();
+      if (current.hex.col === this.finish.col && current.hex.row === this.finish.row) break;
 
       Coordinate.axialOffsetNeighbors(current.hex).forEach((next: IHex) => {
         let nextHex: IHex = Coordinate.axialHexToHex(next);
-        if (!Map.hexInMap(nextHex) || PathFind.isBlock(nextHex)) return;
+        if (!Map.hexInMap(nextHex) || this.isBlock(nextHex)) return;
         let nextOffset: IPriorHex = {
           prior: Biom.getCost(Map.dataMatrix[nextHex.row][nextHex.col]),
           hex: next,
         };
-        let newCost: number = PathFind.costSoFar[JSON.stringify(current.hex)] +  nextOffset.prior;
-        if (PathFind.nextNotInCostSoFar(nextOffset.hex) || newCost < PathFind.costSoFar[JSON.stringify(nextOffset.hex)]) {
-          PathFind.costSoFar[JSON.stringify(nextOffset.hex)] = newCost;
-          let prior: number = newCost + Coordinate.offsetHexDistance(PathFind.finish, nextOffset.hex);
-          PathFind.addPriorFrontier(nextOffset.hex, prior);
-          PathFind.cameFrom[JSON.stringify(nextOffset.hex)] = current.hex;
+        let newCost: number = this.costSoFar[JSON.stringify(current.hex)] +  nextOffset.prior;
+        if (this.nextNotInCostSoFar(nextOffset.hex) || newCost < this.costSoFar[JSON.stringify(nextOffset.hex)]) {
+          this.costSoFar[JSON.stringify(nextOffset.hex)] = newCost;
+          let prior: number = newCost + Coordinate.offsetHexDistance(this.finish, nextOffset.hex);
+          this.addPriorFrontier(nextOffset.hex, prior);
+          this.cameFrom[JSON.stringify(nextOffset.hex)] = current.hex;
         }
       });
     }
-    console.log(date - new Date().getMilliseconds(), 'ms');
+    // console.log(date - new Date().getMilliseconds(), 'ms');
   }
 
   private static getFindPath(): void {
-    PathFind.pathPoints = [];
-    let current: IHex | null = PathFind.finish;
-    while (current !== null) {
-      if (current === undefined) break;
-      PathFind.pathPoints.push(Coordinate.axialToHex(current.col, current.row));
-      current = PathFind.cameFrom[JSON.stringify(current)];
+    this.pathPoints = [];
+    this.pathCost = [];
+    let current: IHex | null = this.finish;
+    let currentString: string;
+    while (current) {
+      currentString = JSON.stringify(current);
+      this.pathPoints.push(Coordinate.axialToHex(current.col, current.row));
+      this.pathCost.push(this.costSoFar[currentString]);
+      current = this.cameFrom[currentString];
     }
-    PathFind.pathPoints.reverse();
-    // console.log(PathFind.pathPoints);
+    this.pathCost.reverse();
+    if (this.pathPoints.length === 1) this.pathPoints = [];
+    else this.pathPoints.reverse();
   }
 
   private static getPriorFrontier(): IPriorHex {
-    PathFind.priorQueue = PathFind.priorQueue.sort((current: IPriorHex, next: IPriorHex) => {
+    this.priorQueue = this.priorQueue.sort((current: IPriorHex, next: IPriorHex) => {
       return (current.prior > next.prior) ? 1 : ((next.prior > current.prior) ? -1 : 0);
     });
-    let hex: IPriorHex = PathFind.priorQueue[0];
-    PathFind.priorQueue.shift();
+    let hex: IPriorHex = this.priorQueue[0];
+    this.priorQueue.shift();
     return hex;
   }
 
   private static addPriorFrontier(h: IHex, p: number): any {
-    PathFind.priorQueue.push({prior: p, hex: h});
+    this.priorQueue.push({prior: p, hex: h});
   }
 
   private static nextNotInCostSoFar(next: IHex): boolean {
-    for (let key in PathFind.costSoFar) {
+    for (let key in this.costSoFar) {
       if (key === JSON.stringify(next)) return false;
     }
     return true;

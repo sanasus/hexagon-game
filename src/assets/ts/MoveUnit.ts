@@ -12,20 +12,18 @@ export default class MoveUnit {
     this.parent = unit;
   }
 
-  public setMovePath(path: Hexagon[]): this {
+  public setMovePath(path: Hexagon[]): void {
+    if (path.length === 0) return;
     this.movePath = path;
     this.parent.emit('move-start');
     this.shared = (delta: number): void => this.move(delta);
     PIXI.ticker.shared.add(this.shared);
-    return this;
   }
 
   private move(delta: number): void {
     if (this.movePath.length > 1) {
       let fin: IAxial = this.movePath[1].center;
       if (this.step(fin)) {
-        this.movePath[0].filters = [];
-        PathFind.pathPoints = [];
         this.movePath[0].unit = null;
         this.parent.setHex(this.movePath[1]);
         this.movePath.splice(0, 1);

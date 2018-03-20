@@ -1,14 +1,14 @@
 import 'normalize.css';
 import './assets/scss/app.scss';
 import * as PIXI from 'pixi.js';
-import "./assets/ts/keyboard"; 
+import "./assets/ts/keyboard";
 import "pixi-layers";
 import "pixi-projection";
 import Boot from "./assets/ts/state/Boot";
 import Battle from "./assets/ts/state/Battle";
-import {Game} from "./assets/ts/pixi-game";
+import { Game } from "./assets/ts/pixi-game";
 import datGui from "dat.gui";
-import {addDisplayGroups} from './assets/ts/Display';
+import { addDisplayGroups } from './assets/ts/Display';
 
 class App extends Game {
   constructor() {
@@ -25,7 +25,7 @@ class App extends Game {
 
     window.onresize = (): void => {
       this.renderer.resize(window.innerWidth, window.innerHeight);
-      // this.state.active.state.removeChildren();
+      this.state.active.state.removeChildren();
       this.state.active.state.rerender();
     };
   }
